@@ -1,8 +1,27 @@
+from nltk import pos_tag
 from nltk.lm.preprocessing import padded_everygram_pipeline
 from nltk.lm import MLE
 from nltk.tokenize.treebank import TreebankWordDetokenizer
 from gensim.models import Word2Vec
 import multiprocessing
+import json
+
+
+def open_json(genre):
+  file_name = genre + '.json'
+  f = open(file_name,)
+  return json.load(f)['data']
+
+
+def pos_tagging(data):
+  pos_tags = {}
+  for line in data:
+      for pair in pos_tag(line):
+          if pair[1] in pos_tags:
+            pos_tags[pair[1]].add(pair[0])
+          else:
+            pos_tags[pair[1]] = {pair[0]}
+  return pos_tags
 
 
 def embedding(data):
@@ -43,12 +62,14 @@ def generate(model):
 
 
 def main():
-    # test
-    text = [['<s>', 'a', 'b', 'c', '<\s>'], ['<s>', 'a', 'c', 'd', 'c', 'e', 'f', '<\s>']]
+    # text = [['<s>', 'a', 'b', 'c', '<\s>'], ['<s>', 'a', 'c', 'd', 'c', 'e', 'f', '<\s>']]
     # model = ngrams(text, 2)
     # print(generate(model))
+    # print(embedding(text).most_similar(positive=['c']))
 
-    print(embedding(text).most_similar(positive=['c']))
+    data = open_json('country')
+    print(pos_tagging(data))
+
 
 
 if __name__ == '__main__':
