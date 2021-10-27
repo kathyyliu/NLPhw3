@@ -1,4 +1,3 @@
-import nltk
 from nltk import pos_tag
 from nltk.lm.preprocessing import padded_everygram_pipeline
 from nltk.lm import MLE
@@ -6,6 +5,7 @@ from nltk.tokenize.treebank import TreebankWordDetokenizer
 from gensim.models import Word2Vec
 import multiprocessing
 import json
+import random
 
 
 def open_json(genre):
@@ -63,13 +63,14 @@ def generate(data, n=2, num_lines=4, max_line_len=8, similarity_threshold=.998):
             if new_token == '</s>':
                 break
             elif new_tag in ('ADJ', 'ADV', 'NOUN', 'PROPN', 'VERB'):
-                most_similar = ('', 0)
+                top_similar =[]
                 for token in song_tags[new_tag]:
                     similarity = vectors.similarity(new_token, token)
-                    if similarity > most_similar[1] and most_similar[0] != new_token:
-                        most_similar = (new_token, similarity)
-                if most_similar[0]:
-                    new_song.append(most_similar[0])
+                    if similarity > similarity_threshold and token != new_token:
+                        top_similar.append(token)
+                if top_similar:
+                    i = random.randint(0, len(top_similar)-1)
+                    new_song.append(top_similar[i])
                     continue
             new_song.append(new_token)
         new_song.append('\n')
@@ -78,11 +79,9 @@ def generate(data, n=2, num_lines=4, max_line_len=8, similarity_threshold=.998):
 
 
 def main():
-    # text = [['<s>', 'a', 'b', 'c', '<\s>'], ['<s>', 'a', 'c', 'd', 'c', 'e', 'f', '<\s>']]
-
-    data = open_json('country')
-    # print(pos_tagging(data))
-    print(generate(data))
+    for genre in ('country', 'metal', 'pop', 'rock'):
+        data = open_json(genre)
+        print(f"{genre}:\n{generate(data)}\n")
 
 
 if __name__ == '__main__':
