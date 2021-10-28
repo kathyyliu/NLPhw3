@@ -62,7 +62,9 @@ def generate(data, n=2, num_lines=4, max_line_len=8, similarity_threshold=.998):
             new_tag = pair[1]
             if new_token == '</s>':
                 break
-            elif new_tag in ('ADJ', 'ADV', 'NOUN', 'PROPN', 'VERB'):
+            elif new_token == '<s>':
+                continue
+            elif new_tag in ('ADJ', 'ADV', 'NOUN', 'PROPN', 'VERB', 'PRT', 'PRON'):
                 top_similar =[]
                 for token in song_tags[new_tag]:
                     similarity = vectors.similarity(new_token, token)
@@ -79,9 +81,11 @@ def generate(data, n=2, num_lines=4, max_line_len=8, similarity_threshold=.998):
 
 
 def main():
-    for genre in ('country', 'metal', 'pop', 'rock'):
-        data = open_json(genre)
-        print(f"{genre}:\n{generate(data)}\n")
+    for n in (1, 2, 3):
+        print('##########', n, 'GRAM #########')
+        for genre in ('country', 'metal', 'pop', 'rock'):
+            data = open_json(genre)
+            print(f"{genre}:\n{generate(data, n=n)}\n")
 
 
 if __name__ == '__main__':
