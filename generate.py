@@ -8,12 +8,6 @@ import json
 import random
 
 
-def open_json(genre):
-  file_name = genre + '.json'
-  f = open(file_name,)
-  return json.load(f)['data']
-
-
 def pos_tagging(data):
   pos_tags = {}
   for line in data:
@@ -49,7 +43,7 @@ def ngrams(data, n):
     return model
 
 
-def generate(data, n=2, num_lines=4, max_line_len=8, similarity_threshold=.998):
+def generate(data, n=2, num_lines=4, max_line_len=8, similarity_threshold=.998, semantics=True):
     model = ngrams(data, n)
     song_tags = pos_tagging(data)
     vectors = embedding(data)
@@ -64,7 +58,7 @@ def generate(data, n=2, num_lines=4, max_line_len=8, similarity_threshold=.998):
                 break
             elif new_token == '<s>':
                 continue
-            elif new_tag in ('ADJ', 'ADV', 'NOUN', 'PROPN', 'VERB', 'PRT', 'PRON'):
+            elif semantics and new_tag in ('ADJ', 'ADV', 'NOUN', 'PROPN', 'VERB', 'PRT', 'PRON'):
                 top_similar =[]
                 for token in song_tags[new_tag]:
                     similarity = vectors.similarity(new_token, token)
@@ -81,11 +75,21 @@ def generate(data, n=2, num_lines=4, max_line_len=8, similarity_threshold=.998):
 
 
 def main():
-    for n in (1, 2, 3):
-        print('##########', n, 'GRAM #########')
-        for genre in ('country', 'metal', 'pop', 'rock'):
-            data = open_json(genre)
-            print(f"{genre}:\n{generate(data, n=n)}\n")
+    # for n in (1, 2, 3):
+    #     print('##########', n, 'GRAM ##########')
+    #     for genre in ('country', 'metal', 'pop', 'rock'):
+    #         file_name = genre + '.json'
+    #         f = open(file_name, )
+    #         data = json.load(f)['data']
+    #         print(f"{genre}:\n{generate(data, n=n)}\n")
+
+    for i in range(10):
+        f = open('rock.json', )
+        data = json.load(f)['data']
+        print(f"########## rock {i+1} ##########\n"
+              f"1: {generate(data)}\n"
+              f"\t\t\t--------\n"
+              f"2: {generate(data, semantics=False)}\n")
 
 
 if __name__ == '__main__':
